@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: projet-s3
+  labels:
+    app: projet-s3
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: projet-s3
+  template:
+    metadata:
+      labels:
+        app: projet-s3
+    spec:
+      containers:
+        - name: projet-s3
+          image: your-dockerhub-username/projet-s3:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 20
+      restartPolicy: Always
