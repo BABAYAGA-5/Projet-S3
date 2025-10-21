@@ -1,5 +1,7 @@
 {
   "dashboard": {
+    "id": null,
+    "uid": null,
     "title": "Projet-S3 Kubernetes Monitoring",
     "tags": ["kubernetes", "projet-s3", "monitoring"],
     "timezone": "browser",
@@ -363,5 +365,7 @@
     "timepicker": {
       "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"]
     }
-  }
+  },
+  "overwrite": true,
+  "message": "Updated by Jenkins Pipeline"
 }
