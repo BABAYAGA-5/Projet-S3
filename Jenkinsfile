@@ -153,15 +153,21 @@ pipeline {
               
               REM Get Minikube IP
               for /f %%i in ('\"C:\\ProgramData\\chocolatey\\bin\\minikube.exe\" ip') do set MINIKUBE_IP=%%i
-              set GRAFANA_URL=http://!MINIKUBE_IP!:30300
+              echo Minikube IP: %MINIKUBE_IP%
               
-              echo Waiting for Grafana to be ready...
-              timeout /t 30 /nobreak
+              REM Wait 30 seconds for Grafana to be ready
+              echo Waiting 30 seconds for Grafana to be ready...
+              ping 127.0.0.1 -n 31 > nul
               
+              REM Import dashboard
               echo Importing dashboard to Grafana...
-              curl -X POST "!GRAFANA_URL!/api/dashboards/db" -H "Content-Type: application/json" -u admin:admin -d @docs/projet-s3-dashboard.json
+              curl -X POST "http://%MINIKUBE_IP%:30300/api/dashboards/db" -H "Content-Type: application/json" -u admin:admin -d @docs/projet-s3-dashboard.json
               
-              echo Dashboard imported successfully!
+              if %ERRORLEVEL% EQU 0 (
+                echo Dashboard imported successfully!
+              ) else (
+                echo Warning: Dashboard import may have failed, check Grafana manually
+              )
             """
           }
         }
