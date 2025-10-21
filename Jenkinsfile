@@ -55,25 +55,23 @@ pipeline {
     stage('Deploy to Kubernetes') {
       steps {
         script {
+          def kubeconfigPath = isUnix() ? '~/.kube/config' : 'C:\\ProgramData\\Jenkins\\.kube\\config'
           if (isUnix()) {
             sh """
-              export KUBECONFIG=~/.kube/config
-              kubectl apply -f k8s/deployment.yaml
-              kubectl apply -f k8s/service.yaml
-              kubectl apply -f k8s/ingress.yaml
-              kubectl rollout status deployment/projet-s3 --timeout=5m
-              kubectl get all -l app=projet-s3
+              kubectl --kubeconfig=${kubeconfigPath} apply -f k8s/deployment.yaml
+              kubectl --kubeconfig=${kubeconfigPath} apply -f k8s/service.yaml
+              kubectl --kubeconfig=${kubeconfigPath} apply -f k8s/ingress.yaml
+              kubectl --kubeconfig=${kubeconfigPath} rollout status deployment/projet-s3 --timeout=5m
+              kubectl --kubeconfig=${kubeconfigPath} get all -l app=projet-s3
             """
           } else {
-            withEnv(["KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config"]) {
-              bat """
-                kubectl apply -f k8s/deployment.yaml
-                kubectl apply -f k8s/service.yaml
-                kubectl apply -f k8s/ingress.yaml
-                kubectl rollout status deployment/projet-s3 --timeout=5m
-                kubectl get all -l app=projet-s3
-              """
-            }
+            bat """
+              kubectl --kubeconfig=${kubeconfigPath} apply -f k8s/deployment.yaml
+              kubectl --kubeconfig=${kubeconfigPath} apply -f k8s/service.yaml
+              kubectl --kubeconfig=${kubeconfigPath} apply -f k8s/ingress.yaml
+              kubectl --kubeconfig=${kubeconfigPath} rollout status deployment/projet-s3 --timeout=5m
+              kubectl --kubeconfig=${kubeconfigPath} get all -l app=projet-s3
+            """
           }
         }
       }
@@ -82,31 +80,29 @@ pipeline {
     stage('Verify Deployment') {
       steps {
         script {
+          def kubeconfigPath = isUnix() ? '~/.kube/config' : 'C:\\ProgramData\\Jenkins\\.kube\\config'
           if (isUnix()) {
             sh """
-              export KUBECONFIG=~/.kube/config
               echo "=== Deployment Status ==="
-              kubectl get deployment projet-s3
+              kubectl --kubeconfig=${kubeconfigPath} get deployment projet-s3
               echo "=== Pods ==="
-              kubectl get pods -l app=projet-s3 -o wide
+              kubectl --kubeconfig=${kubeconfigPath} get pods -l app=projet-s3 -o wide
               echo "=== Service ==="
-              kubectl get service projet-s3
+              kubectl --kubeconfig=${kubeconfigPath} get service projet-s3
               echo "=== Ingress ==="
-              kubectl get ingress projet-s3
+              kubectl --kubeconfig=${kubeconfigPath} get ingress projet-s3
             """
           } else {
-            withEnv(["KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config"]) {
-              bat """
-                echo === Deployment Status ===
-                kubectl get deployment projet-s3
-                echo === Pods ===
-                kubectl get pods -l app=projet-s3 -o wide
-                echo === Service ===
-                kubectl get service projet-s3
-                echo === Ingress ===
-                kubectl get ingress projet-s3
-              """
-            }
+            bat """
+              echo === Deployment Status ===
+              kubectl --kubeconfig=${kubeconfigPath} get deployment projet-s3
+              echo === Pods ===
+              kubectl --kubeconfig=${kubeconfigPath} get pods -l app=projet-s3 -o wide
+              echo === Service ===
+              kubectl --kubeconfig=${kubeconfigPath} get service projet-s3
+              echo === Ingress ===
+              kubectl --kubeconfig=${kubeconfigPath} get ingress projet-s3
+            """
           }
         }
       }
