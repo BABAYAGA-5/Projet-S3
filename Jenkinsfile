@@ -65,11 +65,11 @@ pipeline {
             """
           } else {
             bat """
-              minikube kubectl -- apply -f k8s/deployment.yaml
-              minikube kubectl -- apply -f k8s/service.yaml
-              minikube kubectl -- apply -f k8s/ingress.yaml
-              minikube kubectl -- rollout status deployment/projet-s3 --timeout=5m
-              minikube kubectl -- get all -l app=projet-s3
+              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/deployment.yaml
+              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/service.yaml
+              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/ingress.yaml
+              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- rollout status deployment/projet-s3 --timeout=5m
+              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get all -l app=projet-s3
             """
           }
         }
@@ -93,13 +93,13 @@ pipeline {
           } else {
             bat """
               echo === Deployment Status ===
-              minikube kubectl -- get deployment projet-s3
+              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get deployment projet-s3
               echo === Pods ===
-              minikube kubectl -- get pods -l app=projet-s3 -o wide
+              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get pods -l app=projet-s3 -o wide
               echo === Service ===
-              minikube kubectl -- get service projet-s3
+              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get service projet-s3
               echo === Ingress ===
-              minikube kubectl -- get ingress projet-s3
+              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get ingress projet-s3
             """
           }
         }
@@ -114,7 +114,7 @@ pipeline {
         if (isUnix()) {
           podCount = sh(script: "minikube kubectl -- get pods -l app=projet-s3 --no-headers | wc -l", returnStdout: true).trim()
         } else {
-          podCount = bat(script: "@minikube kubectl -- get pods -l app=projet-s3 --no-headers | find /c /v \"\"", returnStdout: true).trim()
+          podCount = bat(script: "@\"C:\\ProgramData\\chocolatey\\bin\\minikube.exe\" kubectl -- get pods -l app=projet-s3 --no-headers | find /c /v \"\"", returnStdout: true).trim()
         }
         echo "✅ Build successful: ${env.BUILD_TAG}"
         echo "✅ Docker image pushed: ${DOCKER_IMAGE}:${DOCKER_TAG}"
