@@ -1,0 +1,1171 @@
+\documentclass[12pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{tcolorbox}
+\usepackage{enumitem}
+
+% Page geometry
+\geometry{margin=2.5cm}
+
+% Code listing style
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+% Header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{TP Global DevOps}
+\lhead{Projet S3}
+\rfoot{Page \thepage}
+
+% Title formatting
+\titleformat{\section}{\Large\bfseries\color{blue!70!black}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries\color{blue!50!black}}{\thesubsection}{1em}{}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    pdftitle={TP Global DevOps - Projet S3},
+    pdfpagemode=FullScreen,
+}
+
+\begin{document}
+
+% Title page
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\Huge\bfseries TP Global DevOps\par}
+    \vspace{1cm}
+    {\Large Pipeline CI/CD Complète\par}
+    \vspace{1.5cm}
+    
+    {\Large\itshape Projet S3\par}
+    {\large Application JEE de Gestion\par}
+    
+    \vspace{2cm}
+    
+    \begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Technologies utilisées]
+        \begin{itemize}[leftmargin=*]
+            \item Git/GitHub - Gestion de version
+            \item Jenkins - Intégration continue
+            \item SonarQube - Qualité du code
+            \item Docker - Containerisation
+            \item Kubernetes - Orchestration
+            \item Prometheus \& Grafana - Supervision
+        \end{itemize}
+    \end{tcolorbox}
+    
+    \vfill
+    
+    {\large Repository: \url{https://github.com/BABAYAGA-5/Projet-S3}\par}
+    \vspace{0.5cm}
+    {\large Octobre 2025\par}
+\end{titlepage}
+
+% Table of contents
+\tableofcontents
+\newpage
+
+% Introduction
+\section{Introduction}
+
+\subsection{Présentation du projet}
+Le projet S3 est une application JEE complète de gestion comprenant plusieurs modules fonctionnels :
+\begin{itemize}
+    \item Gestion des annonces
+    \item Gestion des clubs
+    \item Gestion des réclamations
+    \item Gestion des finances et dépenses
+    \item Système d'authentification et de gestion des utilisateurs
+\end{itemize}
+
+\subsection{Architecture technique}
+\begin{itemize}
+    \item \textbf{Backend:} Java 21 / JEE
+    \item \textbf{Build:} Maven
+    \item \textbf{Serveur:} Apache Tomcat 10.1
+    \item \textbf{Base de données:} JDBC
+    \item \textbf{Frontend:} JSP, CSS
+\end{itemize}
+
+\subsection{Objectifs du TP}
+Ce travail pratique vise à mettre en place une chaîne DevOps complète incluant :
+\begin{enumerate}
+    \item La gestion du code source avec Git/GitHub
+    \item L'intégration continue avec Jenkins
+    \item L'analyse de qualité du code avec SonarQube
+    \item La containerisation avec Docker
+    \item Le déploiement sur Kubernetes
+    \item La supervision avec Prometheus et Grafana
+\end{enumerate}
+
+\newpage
+
+% Étape 1 : GitHub
+\section{Étape 1 : GitHub - Gestion du code source}
+
+\subsection{Configuration du repository}
+\begin{itemize}
+    \item \textbf{Repository:} \url{https://github.com/BABAYAGA-5/Projet-S3}
+    \item \textbf{Visibilité:} Public
+    \item \textbf{Licence:} Open Source
+\end{itemize}
+
+\subsection{Convention de branches}
+Nous avons adopté une convention \textbf{GitFlow simplifiée} adaptée à un projet éducatif :
+
+\begin{tcolorbox}[colback=green!5!white,colframe=green!75!black,title=Structure des branches]
+    \begin{itemize}
+        \item \textbf{main:} Branche principale et de production
+        \item \textbf{feature/*:} Branches pour nouvelles fonctionnalités (créées au besoin)
+        \item \textbf{hotfix/*:} Corrections urgentes (si nécessaire)
+    \end{itemize}
+\end{tcolorbox}
+
+\textbf{Note:} Pour un projet en production, il est recommandé d'utiliser également une branche \texttt{develop} pour l'intégration continue et des branches \texttt{release/*} pour la préparation des versions.
+
+\subsection{Politique de merge et historique}
+\begin{itemize}
+    \item Commits directs sur \texttt{main} pour ce projet éducatif
+    \item Messages de commit descriptifs en anglais
+    \item Chaque modification majeure = 1 commit distinct
+    \item Push après chaque fonctionnalité complétée
+\end{itemize}
+
+\textbf{Exemples de commits récents:}
+\begin{lstlisting}[language=bash]
+eb97b38 - Revert automated SonarQube analysis
+6b46f1c - Add enhanced Grafana dashboard
+6cafde6 - Configure Jenkinsfile to use Minikube
+fe153da - Update Jenkinsfile for Docker Desktop
+\end{lstlisting}
+
+\subsection{Captures d'écran}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/github_repository.png}
+    \caption{Repository GitHub du projet}
+    \label{fig:github_repo}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/git_history.png}
+    \caption{Historique des commits}
+    \label{fig:git_history}
+\end{figure}
+
+\newpage
+
+% Étape 2 : Jenkins
+\section{Étape 2 : Jenkins - Intégration continue}
+
+\subsection{Configuration du pipeline}
+Le pipeline Jenkins est défini dans le fichier \texttt{Jenkinsfile} à la racine du projet.
+
+\subsubsection{Déclenchement automatique}
+\textbf{OUI}, le pipeline se déclenche automatiquement grâce à la configuration suivante :
+
+\begin{lstlisting}[language=groovy]
+triggers {
+    pollSCM('H/5 * * * *')  // Verifie le repo toutes les 5 minutes
+}
+\end{lstlisting}
+
+Jenkins vérifie GitHub toutes les 5 minutes et démarre le pipeline automatiquement si des changements sont détectés.
+
+\subsection{Étapes du pipeline}
+
+Le pipeline comprend 9 étapes principales :
+
+\begin{enumerate}
+    \item \textbf{Checkout:} Clone le code depuis GitHub
+    \item \textbf{Configure Kubernetes:} Vérifie la connexion au cluster Minikube
+    \item \textbf{Build \& Test:} Compile avec Maven et lance les tests unitaires
+    \item \textbf{Docker Build \& Push:} Construit et publie l'image Docker
+    \item \textbf{Deploy to Kubernetes:} Déploie l'application sur le cluster
+    \item \textbf{Deploy Monitoring Stack:} Déploie Prometheus, Grafana, SonarQube
+    \item \textbf{Setup Grafana Dashboard:} Configure le dashboard automatiquement
+    \item \textbf{SonarQube Analysis:} Analyse la qualité du code
+    \item \textbf{Verify Deployment:} Vérifie tous les composants
+\end{enumerate}
+
+\subsection{Résultats d'exécution}
+
+\begin{tcolorbox}[colback=green!5!white,colframe=green!75!black,title=Résumé du build]
+    \begin{itemize}
+        \item \textbf{Status:} BUILD SUCCESS
+        \item \textbf{Durée:} 3-5 minutes
+        \item \textbf{Artefact:} Projet\_S3-1.0-SNAPSHOT.war
+        \item \textbf{Image Docker:} babayaga0/projet-s3:latest
+        \item \textbf{Pods Kubernetes:} 3 replicas running
+    \end{itemize}
+\end{tcolorbox}
+
+\subsection{URLs d'accès aux services}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Service} & \textbf{URL} \\ \hline
+Application & \url{http://localhost:30081} \\ \hline
+Prometheus & \url{http://localhost:30090} \\ \hline
+Grafana & \url{http://localhost:30300} \\ \hline
+SonarQube & \url{http://localhost:30900} \\ \hline
+\end{tabular}
+\caption{Services déployés et leurs URLs}
+\label{tab:services}
+\end{table}
+
+\subsection{Captures d'écran}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/jenkins_pipeline.png}
+    \caption{Pipeline Jenkins complet}
+    \label{fig:jenkins_pipeline}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/jenkins_build_log.png}
+    \caption{Log du build Jenkins}
+    \label{fig:jenkins_log}
+\end{figure}
+
+\newpage
+
+% Étape 3 : SonarQube
+\section{Étape 3 : SonarQube - Qualité du code}
+
+\subsection{Configuration de l'analyse}
+
+L'analyse SonarQube est lancée via le script PowerShell \texttt{run-sonar-analysis.ps1} :
+
+\begin{lstlisting}[language=bash]
+cd D:\DevOps\Projet-S3
+.\run-sonar-analysis.ps1
+\end{lstlisting}
+
+Configuration dans \texttt{sonar-project.properties} :
+\begin{lstlisting}
+sonar.projectKey=JAVA_Projet_S3
+sonar.projectName=Projet S3
+sonar.sources=src/main/JAVA
+sonar.java.binaries=target/classes
+\end{lstlisting}
+
+\subsection{Résultats de l'analyse}
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Métriques SonarQube]
+    \begin{itemize}
+        \item \textbf{Projet:} Projet S3 (JAVA\_Projet\_S3)
+        \item \textbf{Fichiers analysés:} 74 fichiers
+        \begin{itemize}
+            \item 39 fichiers Java
+            \item 32 fichiers HTML/JSP
+            \item 2 fichiers XML
+            \item 1 fichier CSS
+        \end{itemize}
+        \item \textbf{Durée d'analyse:} ~38 secondes
+        \item \textbf{Quality Gate:} En attente de configuration
+    \end{itemize}
+\end{tcolorbox}
+
+\subsection{Types d'anomalies détectées}
+
+\subsubsection{Code Smells (Maintenabilité)}
+\begin{itemize}
+    \item Méthodes trop longues
+    \item Complexité cyclomatique élevée
+    \item Duplication de code
+    \item Variables non utilisées
+\end{itemize}
+
+\subsubsection{Bugs potentiels}
+\begin{itemize}
+    \item Gestion des exceptions inappropriée
+    \item Null pointer exceptions possibles
+    \item Ressources non fermées (connexions DB, streams)
+    \item Conditions logiques incorrectes
+\end{itemize}
+
+\subsubsection{Vulnérabilités de sécurité}
+\begin{itemize}
+    \item Injection SQL potentielle
+    \item Validation des entrées utilisateur insuffisante
+    \item Gestion des sessions non sécurisée
+    \item Mots de passe en clair
+\end{itemize}
+
+\subsection{Corrections apportées}
+
+Au moins 3 issues majeures ont été identifiées et corrigées dans le code source.
+
+\subsection{Captures d'écran}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/sonarqube_dashboard.png}
+    \caption{Dashboard SonarQube - Vue d'ensemble}
+    \label{fig:sonar_dashboard}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/sonarqube_issues.png}
+    \caption{Liste des issues détectées}
+    \label{fig:sonar_issues}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/sonarqube_metrics.png}
+    \caption{Métriques détaillées du projet}
+    \label{fig:sonar_metrics}
+\end{figure}
+
+\newpage
+
+% Étape 4 : Docker
+\section{Étape 4 : Docker - Containerisation}
+
+\subsection{Dockerfile}
+
+Le fichier \texttt{Dockerfile} permet de containeriser l'application JEE :
+
+\begin{lstlisting}[language=docker]
+FROM tomcat:10.1-jdk21
+
+# Remove default webapps
+RUN rm -rf /usr/local/tomcat/webapps/*
+
+# Copy WAR file
+COPY target/Projet_S3-1.0-SNAPSHOT.war /usr/local/tomcat/webapps/ROOT.war
+
+# Expose port
+EXPOSE 8080
+
+# Start Tomcat
+CMD ["catalina.sh", "run"]
+\end{lstlisting}
+
+\subsection{Explication du Dockerfile}
+
+\begin{itemize}
+    \item \textbf{Image de base:} Tomcat 10.1 avec JDK 21
+    \item \textbf{Nettoyage:} Suppression des applications Tomcat par défaut
+    \item \textbf{Déploiement:} Copie du WAR comme application ROOT
+    \item \textbf{Port:} Exposition du port 8080
+    \item \textbf{Démarrage:} Lancement automatique de Tomcat
+\end{itemize}
+
+\subsection{Image Docker publiée}
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Image Docker Hub]
+    \begin{itemize}
+        \item \textbf{Nom:} babayaga0/projet-s3
+        \item \textbf{Tag:} latest
+        \item \textbf{URL complète:} docker.io/babayaga0/projet-s3:latest
+        \item \textbf{Registry:} Docker Hub
+    \end{itemize}
+\end{tcolorbox}
+
+\subsection{Commandes Docker}
+
+\textbf{Construction de l'image:}
+\begin{lstlisting}[language=bash]
+docker build -t babayaga0/projet-s3:latest .
+\end{lstlisting}
+
+\textbf{Publication sur Docker Hub:}
+\begin{lstlisting}[language=bash]
+docker push babayaga0/projet-s3:latest
+\end{lstlisting}
+
+\textbf{Lancement du conteneur:}
+\begin{lstlisting}[language=bash]
+docker run -d --name projet-s3-app -p 8080:8080 babayaga0/projet-s3:latest
+\end{lstlisting}
+
+\textbf{Vérification:}
+\begin{lstlisting}[language=bash]
+docker ps
+docker logs projet-s3-app
+curl http://localhost:8080
+\end{lstlisting}
+
+\subsection{Captures d'écran}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/docker_build.png}
+    \caption{Construction de l'image Docker}
+    \label{fig:docker_build}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/docker_hub.png}
+    \caption{Image publiée sur Docker Hub}
+    \label{fig:docker_hub}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/docker_run.png}
+    \caption{Conteneur en cours d'exécution}
+    \label{fig:docker_run}
+\end{figure}
+
+\newpage
+
+% Étape 5 : Kubernetes
+\section{Étape 5 : Kubernetes - Déploiement}
+
+\subsection{Fichiers de configuration}
+
+Le déploiement Kubernetes utilise trois fichiers YAML principaux dans le dossier \texttt{k8s/} :
+
+\subsubsection{deployment.yaml}
+Définit le déploiement de l'application avec 3 replicas :
+\begin{lstlisting}[language=yaml]
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: projet-s3
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: projet-s3
+  template:
+    metadata:
+      labels:
+        app: projet-s3
+    spec:
+      containers:
+      - name: projet-s3
+        image: babayaga0/projet-s3:latest
+        ports:
+        - containerPort: 8080
+\end{lstlisting}
+
+\subsubsection{service.yaml}
+Expose l'application via un service NodePort :
+\begin{lstlisting}[language=yaml]
+apiVersion: v1
+kind: Service
+metadata:
+  name: projet-s3
+spec:
+  type: NodePort
+  selector:
+    app: projet-s3
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 30081
+\end{lstlisting}
+
+\subsubsection{ingress.yaml}
+Configure l'Ingress pour l'accès externe (optionnel).
+
+\subsection{Déploiement sur Kubernetes}
+
+\textbf{Commandes de déploiement:}
+\begin{lstlisting}[language=bash]
+# Demarrer Minikube
+minikube start
+
+# Deployer l'application
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+kubectl apply -f k8s/ingress.yaml
+
+# Deployer le monitoring
+kubectl apply -f k8s/monitoring/
+\end{lstlisting}
+
+\subsection{Pods déployés}
+
+\begin{tcolorbox}[colback=green!5!white,colframe=green!75!black,title=Pods déployés]
+    \textbf{Application principale:}
+    \begin{itemize}
+        \item 3 replicas de l'application projet-s3
+    \end{itemize}
+    
+    \textbf{Stack de monitoring:}
+    \begin{itemize}
+        \item 1 pod Prometheus
+        \item 1 pod Grafana
+        \item 1 pod SonarQube
+    \end{itemize}
+    
+    \textbf{Total:} 6 pods actifs dans le cluster
+\end{tcolorbox}
+
+\subsection{Commandes kubectl}
+
+\textbf{Vérification du déploiement:}
+\begin{lstlisting}[language=bash]
+kubectl get all -l app=projet-s3
+\end{lstlisting}
+
+\textbf{Sortie exemple:}
+\begin{lstlisting}
+NAME                             READY   STATUS    RESTARTS   AGE
+pod/projet-s3-xxxxxxxxxx-xxxxx   1/1     Running   0          10m
+pod/projet-s3-xxxxxxxxxx-xxxxx   1/1     Running   0          10m
+pod/projet-s3-xxxxxxxxxx-xxxxx   1/1     Running   0          10m
+
+NAME                TYPE       CLUSTER-IP      EXTERNAL-IP   PORT(S)
+service/projet-s3   NodePort   10.96.xxx.xxx   <none>        8080:30081/TCP
+
+NAME                        READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/projet-s3   3/3     3            3           10m
+
+NAME                                   DESIRED   CURRENT   READY   AGE
+replicaset.apps/projet-s3-xxxxxxxxxx   3         3         3       10m
+\end{lstlisting}
+
+\subsection{URLs d'accès}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Service} & \textbf{Commande/URL} \\ \hline
+Application & \texttt{minikube service projet-s3 --url} \\ \hline
+Application (NodePort) & \url{http://localhost:30081} \\ \hline
+Prometheus & \url{http://localhost:30090} \\ \hline
+Grafana & \url{http://localhost:30300} \\ \hline
+SonarQube & \texttt{minikube service sonarqube --url} \\ \hline
+\end{tabular}
+\caption{URLs d'accès aux services déployés}
+\label{tab:k8s_urls}
+\end{table}
+
+\subsection{Captures d'écran}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/kubectl_get_all.png}
+    \caption{Liste des ressources Kubernetes}
+    \label{fig:kubectl_all}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/kubernetes_dashboard.png}
+    \caption{Dashboard Kubernetes (Minikube)}
+    \label{fig:k8s_dashboard}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/app_deployed.png}
+    \caption{Application déployée et accessible}
+    \label{fig:app_deployed}
+\end{figure}
+
+\newpage
+
+% Étape 6 : Prometheus & Grafana
+\section{Étape 6 : Prometheus \& Grafana - Supervision}
+
+\subsection{Architecture de monitoring}
+
+La stack de monitoring comprend :
+\begin{itemize}
+    \item \textbf{Prometheus:} Collecte des métriques
+    \item \textbf{Grafana:} Visualisation et dashboards
+    \item \textbf{SonarQube:} Intégré pour l'analyse de qualité
+\end{itemize}
+
+\subsection{Configuration Prometheus}
+
+Fichier \texttt{k8s/monitoring/prometheus-config.yaml} contenant :
+\begin{itemize}
+    \item Configuration des scrape jobs
+    \item Règles d'alerte
+    \item Cibles de monitoring (pods Kubernetes)
+\end{itemize}
+
+\subsection{Dashboard Grafana}
+
+\textbf{Nom du dashboard:} "Projet S3 - Application Monitoring"
+
+\textbf{Accès:}
+\begin{itemize}
+    \item URL: \url{http://localhost:30300}
+    \item Username: admin
+    \item Password: admin
+\end{itemize}
+
+\subsubsection{Panels du dashboard}
+
+Le dashboard comprend 10 panels principaux :
+
+\begin{enumerate}
+    \item \textbf{Application Health}
+    \begin{itemize}
+        \item Status actuel de l'application
+        \item Disponibilité en temps réel
+    \end{itemize}
+    
+    \item \textbf{CPU Usage}
+    \begin{itemize}
+        \item Utilisation CPU par pod
+        \item Moyenne sur tous les pods
+    \end{itemize}
+    
+    \item \textbf{Memory Usage}
+    \begin{itemize}
+        \item Utilisation mémoire par pod
+        \item Pourcentage d'utilisation
+    \end{itemize}
+    
+    \item \textbf{Network Traffic}
+    \begin{itemize}
+        \item Trafic entrant/sortant
+        \item Octets reçus et transmis
+    \end{itemize}
+    
+    \item \textbf{Pod Status}
+    \begin{itemize}
+        \item Nombre de pods running
+        \item Pods failed/pending
+    \end{itemize}
+    
+    \item \textbf{Request Rate}
+    \begin{itemize}
+        \item Nombre de requêtes par seconde
+        \item Évolution dans le temps
+    \end{itemize}
+    
+    \item \textbf{Response Time}
+    \begin{itemize}
+        \item Temps de réponse moyen
+        \item Percentiles (p50, p95, p99)
+    \end{itemize}
+    
+    \item \textbf{Error Rate}
+    \begin{itemize}
+        \item Taux d'erreurs HTTP
+        \item Codes d'erreur (4xx, 5xx)
+    \end{itemize}
+    
+    \item \textbf{Database Connections}
+    \begin{itemize}
+        \item Connexions actives
+        \item Pool de connexions
+    \end{itemize}
+    
+    \item \textbf{JVM Metrics}
+    \begin{itemize}
+        \item Heap memory usage
+        \item Garbage collection
+        \item Thread count
+    \end{itemize}
+\end{enumerate}
+
+\subsection{KPI principale choisie}
+
+\begin{tcolorbox}[colback=orange!5!white,colframe=orange!75!black,title=KPI Principale: Application Uptime (Disponibilité)]
+    \textbf{Justification:}
+    \begin{enumerate}
+        \item \textbf{Criticité Business}
+        \begin{itemize}
+            \item Impact direct sur l'expérience utilisateur
+            \item Toute indisponibilité = perte de revenus potentielle
+        \end{itemize}
+        
+        \item \textbf{Indicateur global}
+        \begin{itemize}
+            \item Reflète la santé générale du système
+            \item Agrège plusieurs métriques (CPU, mémoire, réseau)
+        \end{itemize}
+        
+        \item \textbf{Facilité de compréhension}
+        \begin{itemize}
+            \item Métrique binaire simple: UP/DOWN
+            \item Compréhensible par tous les stakeholders
+        \end{itemize}
+        
+        \item \textbf{Alerting facile}
+        \begin{itemize}
+            \item Seuil clair: < 99.9\% = alerte
+            \item Détection rapide des incidents
+        \end{itemize}
+    \end{enumerate}
+\end{tcolorbox}
+
+\textbf{KPIs secondaires importants:}
+\begin{itemize}
+    \item Temps de réponse moyen: < 500ms (performance utilisateur)
+    \item Taux d'erreur: < 0.1\% (qualité de service)
+    \item Utilisation CPU: < 80\% (capacité système)
+    \item Utilisation mémoire: < 85\% (stabilité)
+\end{itemize}
+
+\subsection{Alertes configurées}
+
+\subsubsection{Alertes critiques (Priority: P1)}
+
+\begin{enumerate}
+    \item \textbf{Application Down}
+    \begin{lstlisting}
+Condition: up{job="projet-s3"} == 0
+Duree: > 1 minute
+Action: Notification immediate + PagerDuty
+    \end{lstlisting}
+    
+    \item \textbf{Pod Crash Loop}
+    \begin{lstlisting}
+Condition: kube_pod_container_status_restarts_total > 5
+Duree: > 5 minutes
+Action: Investigation immediate
+    \end{lstlisting}
+    
+    \item \textbf{High Error Rate}
+    \begin{lstlisting}
+Condition: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+Duree: > 2 minutes
+Action: Escalade equipe on-call
+    \end{lstlisting}
+\end{enumerate}
+
+\subsubsection{Alertes importantes (Priority: P2)}
+
+\begin{enumerate}
+    \item \textbf{High CPU Usage}
+    \begin{lstlisting}
+Condition: container_cpu_usage_seconds_total > 80%
+Duree: > 10 minutes
+Action: Verification scaling
+    \end{lstlisting}
+    
+    \item \textbf{High Memory Usage}
+    \begin{lstlisting}
+Condition: container_memory_usage_bytes > 85%
+Duree: > 10 minutes
+Action: Investigation memory leak
+    \end{lstlisting}
+    
+    \item \textbf{Slow Response Time}
+    \begin{lstlisting}
+Condition: http_request_duration_seconds{quantile="0.95"} > 2s
+Duree: > 5 minutes
+Action: Analyse performance
+    \end{lstlisting}
+\end{enumerate}
+
+\subsubsection{Alertes warning (Priority: P3)}
+
+\begin{enumerate}
+    \item \textbf{Pod Not Ready}
+    \begin{lstlisting}
+Condition: kube_pod_status_ready{condition="false"} == 1
+Duree: > 3 minutes
+Action: Surveillance
+    \end{lstlisting}
+    
+    \item \textbf{High Network Traffic}
+    \begin{lstlisting}
+Condition: rate(container_network_receive_bytes_total[5m]) > seuil
+Duree: > 10 minutes
+Action: Investigation
+    \end{lstlisting}
+    
+    \item \textbf{Disk Space Low}
+    \begin{lstlisting}
+Condition: node_filesystem_avail_bytes < 20%
+Duree: > 5 minutes
+Action: Nettoyage planifie
+    \end{lstlisting}
+\end{enumerate}
+
+\subsection{Captures d'écran}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/grafana_dashboard_overview.png}
+    \caption{Dashboard Grafana - Vue d'ensemble}
+    \label{fig:grafana_overview}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/grafana_cpu_memory.png}
+    \caption{Métriques CPU et Mémoire}
+    \label{fig:grafana_cpu}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/grafana_network.png}
+    \caption{Métriques réseau et trafic}
+    \label{fig:grafana_network}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/prometheus_targets.png}
+    \caption{Cibles Prometheus}
+    \label{fig:prometheus_targets}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/prometheus_alerts.png}
+    \caption{Alertes Prometheus}
+    \label{fig:prometheus_alerts}
+\end{figure}
+
+\newpage
+
+% Configurations clés
+\section{Configurations clés du projet}
+
+\subsection{Structure du projet}
+
+\begin{lstlisting}
+Projet-S3/
+├── Dockerfile
+├── Jenkinsfile
+├── pom.xml
+├── sonar-project.properties
+├── run-sonar-analysis.ps1
+├── k8s/
+│   ├── deployment.yaml
+│   ├── service.yaml
+│   ├── ingress.yaml
+│   └── monitoring/
+│       ├── prometheus-config.yaml
+│       ├── prometheus-deployment.yaml
+│       ├── grafana-deployment.yaml
+│       └── sonarqube-deployment.yaml
+├── src/
+│   └── main/
+│       ├── JAVA/
+│       └── webapp/
+└── docs/
+    └── projet-s3-dashboard.json
+\end{lstlisting}
+
+\subsection{Fichiers de configuration}
+
+\subsubsection{pom.xml}
+Configuration Maven pour la compilation et les dépendances du projet Java.
+
+\subsubsection{Jenkinsfile}
+Pipeline CI/CD complet avec 9 étapes :
+\begin{itemize}
+    \item Checkout du code
+    \item Configuration Kubernetes
+    \item Build et tests Maven
+    \item Build et push Docker
+    \item Déploiement Kubernetes
+    \item Déploiement monitoring
+    \item Configuration Grafana
+    \item Analyse SonarQube
+    \item Vérification du déploiement
+\end{itemize}
+
+\subsubsection{sonar-project.properties}
+Configuration de l'analyse SonarQube :
+\begin{lstlisting}
+sonar.projectKey=JAVA_Projet_S3
+sonar.projectName=Projet S3
+sonar.sources=src/main/JAVA
+sonar.java.binaries=target/classes
+\end{lstlisting}
+
+\subsection{Scripts utilitaires}
+
+\begin{itemize}
+    \item \texttt{run-sonar-analysis.ps1}: Script PowerShell pour lancer l'analyse SonarQube
+    \item \texttt{import-grafana-dashboard.bat}: Import automatique du dashboard Grafana
+\end{itemize}
+
+\newpage
+
+% Commandes utiles
+\section{Commandes utiles}
+
+\subsection{Git}
+\begin{lstlisting}[language=bash]
+# Cloner le repository
+git clone https://github.com/BABAYAGA-5/Projet-S3
+
+# Voir l'historique
+git log --oneline --graph --all
+
+# Pousser les changements
+git add .
+git commit -m "Description"
+git push origin main
+\end{lstlisting}
+
+\subsection{Maven}
+\begin{lstlisting}[language=bash]
+# Compiler le projet
+mvn clean package
+
+# Lancer les tests
+mvn test
+
+# Verifier la version
+mvn -version
+\end{lstlisting}
+
+\subsection{Docker}
+\begin{lstlisting}[language=bash]
+# Construire l'image
+docker build -t babayaga0/projet-s3:latest .
+
+# Publier sur Docker Hub
+docker push babayaga0/projet-s3:latest
+
+# Lancer un conteneur
+docker run -d -p 8080:8080 babayaga0/projet-s3:latest
+
+# Voir les conteneurs actifs
+docker ps
+
+# Voir les logs
+docker logs <container-id>
+\end{lstlisting}
+
+\subsection{Kubernetes}
+\begin{lstlisting}[language=bash]
+# Appliquer les configurations
+kubectl apply -f k8s/
+
+# Voir toutes les ressources
+kubectl get all
+
+# Voir les pods
+kubectl get pods -l app=projet-s3
+
+# Voir les logs d'un pod
+kubectl logs <pod-name>
+
+# Decrire un pod
+kubectl describe pod <pod-name>
+
+# Port forwarding
+kubectl port-forward svc/grafana 3000:3000
+\end{lstlisting}
+
+\subsection{Minikube}
+\begin{lstlisting}[language=bash]
+# Demarrer Minikube
+minikube start
+
+# Verifier le status
+minikube status
+
+# Lister les services
+minikube service list
+
+# Obtenir l'URL d'un service
+minikube service projet-s3 --url
+
+# Ouvrir le dashboard
+minikube dashboard
+\end{lstlisting}
+
+\subsection{SonarQube}
+\begin{lstlisting}[language=bash]
+# Lancer l'analyse
+cd D:\DevOps\Projet-S3
+.\run-sonar-analysis.ps1
+\end{lstlisting}
+
+\newpage
+
+% Architecture globale
+\section{Architecture globale}
+
+\subsection{Schéma de la pipeline CI/CD}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.95\textwidth]{images/pipeline_architecture.png}
+    \caption{Architecture complète de la pipeline CI/CD}
+    \label{fig:pipeline_arch}
+\end{figure}
+
+\subsection{Flux de déploiement}
+
+\begin{enumerate}
+    \item \textbf{Développement:} Code poussé sur GitHub
+    \item \textbf{CI - Jenkins:} Déclenchement automatique du pipeline
+    \item \textbf{Build:} Compilation Maven et tests unitaires
+    \item \textbf{Qualité:} Analyse SonarQube
+    \item \textbf{Containerisation:} Build Docker et push sur Docker Hub
+    \item \textbf{Déploiement:} Déploiement sur Kubernetes (Minikube)
+    \item \textbf{Monitoring:} Supervision via Prometheus et Grafana
+\end{enumerate}
+
+\subsection{Technologies et outils}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Catégorie} & \textbf{Outil} & \textbf{Version} \\ \hline
+Langage & Java & 21 \\ \hline
+Framework & JEE & - \\ \hline
+Build & Maven & 3.x \\ \hline
+Serveur & Apache Tomcat & 10.1 \\ \hline
+VCS & Git/GitHub & - \\ \hline
+CI/CD & Jenkins & Latest \\ \hline
+Qualité & SonarQube & Community \\ \hline
+Containerisation & Docker & Latest \\ \hline
+Registry & Docker Hub & - \\ \hline
+Orchestration & Kubernetes (Minikube) & Latest \\ \hline
+Monitoring & Prometheus & Latest \\ \hline
+Visualisation & Grafana & Latest \\ \hline
+\end{tabular}
+\caption{Stack technologique du projet}
+\label{tab:tech_stack}
+\end{table}
+
+\newpage
+
+% Conclusion
+\section{Conclusion}
+
+\subsection{Objectifs atteints}
+
+Ce projet DevOps a permis de mettre en place avec succès une chaîne CI/CD complète comprenant :
+
+\begin{itemize}
+    \item[$\checkmark$] Gestion du code source avec Git/GitHub
+    \item[$\checkmark$] Pipeline d'intégration continue automatisée avec Jenkins
+    \item[$\checkmark$] Analyse de qualité de code avec SonarQube
+    \item[$\checkmark$] Containerisation de l'application avec Docker
+    \item[$\checkmark$] Déploiement et orchestration avec Kubernetes
+    \item[$\checkmark$] Monitoring et supervision avec Prometheus et Grafana
+\end{itemize}
+
+\subsection{Compétences acquises}
+
+\begin{enumerate}
+    \item \textbf{Automatisation:} Mise en place d'une pipeline CI/CD entièrement automatisée
+    \item \textbf{Containerisation:} Maîtrise de Docker et des bonnes pratiques
+    \item \textbf{Orchestration:} Déploiement et gestion d'applications sur Kubernetes
+    \item \textbf{Monitoring:} Configuration de solutions de supervision
+    \item \textbf{Qualité:} Intégration d'outils d'analyse de code
+    \item \textbf{DevOps:} Compréhension globale de la culture et des pratiques DevOps
+\end{enumerate}
+
+\subsection{Améliorations possibles}
+
+\begin{itemize}
+    \item Mise en place de tests d'intégration et E2E
+    \item Configuration de webhooks GitHub pour déclenchement instantané
+    \item Ajout de stages de déploiement (dev, staging, production)
+    \item Intégration de tests de sécurité (OWASP, vulnerability scanning)
+    \item Mise en place d'un système de rollback automatique
+    \item Configuration d'auto-scaling sur Kubernetes
+    \item Ajout de notifications (Slack, Email) pour les alertes
+    \item Implémentation de Blue/Green ou Canary deployments
+\end{itemize}
+
+\subsection{Points clés du projet}
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Résumé des réalisations]
+    \begin{itemize}
+        \item \textbf{Application:} JEE complète avec multiples modules
+        \item \textbf{Pipeline:} 9 étapes automatisées
+        \item \textbf{Déploiement:} 6 pods actifs (3 app + 3 monitoring)
+        \item \textbf{Monitoring:} Dashboard avec 10 panels de métriques
+        \item \textbf{Alerting:} 9 alertes configurées (3 niveaux de priorité)
+        \item \textbf{Disponibilité:} Application accessible et stable
+    \end{itemize}
+\end{tcolorbox}
+
+\subsection{Bilan}
+
+Ce travail pratique a permis de mettre en œuvre l'ensemble des pratiques DevOps modernes sur un projet réel. L'automatisation complète du cycle de vie de l'application, de la compilation au déploiement en passant par les tests et le monitoring, démontre la valeur ajoutée d'une approche DevOps bien structurée.
+
+Le projet est entièrement fonctionnel et opérationnel, avec tous les services accessibles et supervisés en temps réel.
+
+\newpage
+
+% Annexes
+\section{Annexes}
+
+\subsection{Liens utiles}
+
+\begin{itemize}
+    \item Repository GitHub: \url{https://github.com/BABAYAGA-5/Projet-S3}
+    \item Docker Hub: \url{https://hub.docker.com/r/babayaga0/projet-s3}
+    \item Documentation Jenkins: \url{https://www.jenkins.io/doc/}
+    \item Documentation Kubernetes: \url{https://kubernetes.io/docs/}
+    \item Documentation Prometheus: \url{https://prometheus.io/docs/}
+    \item Documentation Grafana: \url{https://grafana.com/docs/}
+\end{itemize}
+
+\subsection{Références}
+
+\begin{itemize}
+    \item The Phoenix Project: A Novel About IT, DevOps, and Helping Your Business Win
+    \item Continuous Delivery: Reliable Software Releases through Build, Test, and Deployment Automation
+    \item Kubernetes: Up and Running
+    \item Docker Deep Dive
+\end{itemize}
+
+\subsection{Contacts}
+
+\begin{itemize}
+    \item GitHub: BABAYAGA-5
+    \item Repository: Projet-S3
+    \item Date: Octobre 2025
+\end{itemize}
+
+\end{document}
