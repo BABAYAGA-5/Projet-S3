@@ -47,9 +47,18 @@ pipeline {
     stage('Docker Build & Push') {
       steps {
         script {
-          docker.withRegistry('https://registry.hub.docker.com', DOCKERHUB_CREDENTIALS) {
-            def app = docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
-            app.push()
+          if (isUnix()) {
+            sh """
+              docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
+              echo ${DOCKERHUB_CREDENTIALS_PSW} | docker login -u ${DOCKERHUB_CREDENTIALS_USR} --password-stdin
+              docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
+            """
+          } else {
+            bat """
+              docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
+              echo %DOCKERHUB_CREDENTIALS_PSW% | docker login -u %DOCKERHUB_CREDENTIALS_USR% --password-stdin
+              docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
+            """
           }
         }
       }
