@@ -57,6 +57,7 @@ pipeline {
         script {
           if (isUnix()) {
             sh """
+              export KUBECONFIG=~/.kube/config
               kubectl apply -f k8s/deployment.yaml
               kubectl apply -f k8s/service.yaml
               kubectl apply -f k8s/ingress.yaml
@@ -65,6 +66,7 @@ pipeline {
             """
           } else {
             bat """
+              set KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config
               kubectl apply -f k8s/deployment.yaml
               kubectl apply -f k8s/service.yaml
               kubectl apply -f k8s/ingress.yaml
@@ -81,6 +83,7 @@ pipeline {
         script {
           if (isUnix()) {
             sh """
+              export KUBECONFIG=~/.kube/config
               echo "=== Deployment Status ==="
               kubectl get deployment projet-s3
               echo "=== Pods ==="
@@ -92,6 +95,7 @@ pipeline {
             """
           } else {
             bat """
+              set KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config
               echo === Deployment Status ===
               kubectl get deployment projet-s3
               echo === Pods ===
