@@ -9,6 +9,10 @@ pipeline {
   environment {
     DOCKER_IMAGE = "${env.DOCKER_IMAGE_NAME ?: 'babayaga0/projet-s3'}"
     DOCKER_TAG = "${env.DOCKER_IMAGE_TAG ?: 'latest'}"
+    // Use Jenkins kubeconfig path
+    // Windows: C:\ProgramData\Jenkins\.kube\config
+    // Linux: ${HOME}/.kube/config
+    KUBECONFIG = 'C:\\ProgramData\\Jenkins\\.kube\\config'
   }
 
   triggers {
@@ -19,6 +23,42 @@ pipeline {
     stage('Checkout') {
       steps {
         checkout scm
+      }
+    }
+
+    stage('Configure Kubernetes') {
+      steps {
+        script {
+          if (isUnix()) {
+            sh '''
+              echo "=== Environment Check ==="
+              echo "KUBECONFIG: ${KUBECONFIG}"
+              echo "=== Updating Minikube context ==="
+              minikube update-context
+              echo "=== Checking kubectl configuration ==="
+              kubectl config get-contexts
+              kubectl config current-context
+              kubectl config use-context minikube
+              echo "=== Verifying cluster connection ==="
+              kubectl cluster-info
+              kubectl get nodes
+            '''
+          } else {
+            bat '''
+              echo === Environment Check ===
+              echo KUBECONFIG: %KUBECONFIG%
+              echo === Updating Minikube context ===
+              minikube update-context
+              echo === Checking kubectl configuration ===
+              kubectl config get-contexts
+              kubectl config current-context
+              kubectl config use-context minikube
+              echo === Verifying cluster connection ===
+              kubectl cluster-info
+              kubectl get nodes
+            '''
+          }
+        }
       }
     }
 
@@ -57,18 +97,42 @@ pipeline {
         script {
           if (isUnix()) {
             sh """
+              echo "=== Ensuring correct context ==="
+              kubectl config use-context minikube
+              
+              echo "=== Verifying cluster connectivity ==="
+              kubectl cluster-info || (echo "ERROR: Cannot connect to Kubernetes cluster" && exit 1)
+              kubectl get nodes
+              
+              echo "=== Applying Kubernetes manifests ==="
               kubectl apply -f k8s/deployment.yaml
               kubectl apply -f k8s/service.yaml
               kubectl apply -f k8s/ingress.yaml
+              
+              echo "=== Waiting for deployment to be ready ==="
               kubectl rollout status deployment/projet-s3 --timeout=5m
+              
+              echo "=== Deployment verification ==="
               kubectl get all -l app=projet-s3
             """
           } else {
             bat """
+              echo === Ensuring correct context ===
+              kubectl config use-context minikube
+              
+              echo === Verifying cluster connectivity ===
+              kubectl cluster-info || (echo ERROR: Cannot connect to Kubernetes cluster && exit /b 1)
+              kubectl get nodes
+              
+              echo === Applying Kubernetes manifests ===
               kubectl apply -f k8s/deployment.yaml
               kubectl apply -f k8s/service.yaml
               kubectl apply -f k8s/ingress.yaml
+              
+              echo === Waiting for deployment to be ready ===
               kubectl rollout status deployment/projet-s3 --timeout=5m
+              
+              echo === Deployment verification ===
               kubectl get all -l app=projet-s3
             """
           }
