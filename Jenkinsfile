@@ -65,14 +65,15 @@ pipeline {
               kubectl get all -l app=projet-s3
             """
           } else {
-            bat """
-              set KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config
-              kubectl apply -f k8s/deployment.yaml
-              kubectl apply -f k8s/service.yaml
-              kubectl apply -f k8s/ingress.yaml
-              kubectl rollout status deployment/projet-s3 --timeout=5m
-              kubectl get all -l app=projet-s3
-            """
+            withEnv(["KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config"]) {
+              bat """
+                kubectl apply -f k8s/deployment.yaml
+                kubectl apply -f k8s/service.yaml
+                kubectl apply -f k8s/ingress.yaml
+                kubectl rollout status deployment/projet-s3 --timeout=5m
+                kubectl get all -l app=projet-s3
+              """
+            }
           }
         }
       }
@@ -94,17 +95,18 @@ pipeline {
               kubectl get ingress projet-s3
             """
           } else {
-            bat """
-              set KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config
-              echo === Deployment Status ===
-              kubectl get deployment projet-s3
-              echo === Pods ===
-              kubectl get pods -l app=projet-s3 -o wide
-              echo === Service ===
-              kubectl get service projet-s3
-              echo === Ingress ===
-              kubectl get ingress projet-s3
-            """
+            withEnv(["KUBECONFIG=C:\\ProgramData\\Jenkins\\.kube\\config"]) {
+              bat """
+                echo === Deployment Status ===
+                kubectl get deployment projet-s3
+                echo === Pods ===
+                kubectl get pods -l app=projet-s3 -o wide
+                echo === Service ===
+                kubectl get service projet-s3
+                echo === Ingress ===
+                kubectl get ingress projet-s3
+              """
+            }
           }
         }
       }
