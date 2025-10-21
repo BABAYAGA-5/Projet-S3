@@ -9,8 +9,7 @@ pipeline {
   environment {
     // Configure these in Jenkins: Manage Jenkins → Credentials
     DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
-    // IMPORTANT: Replace 'your-dockerhub-username' with your actual Docker Hub username
-    DOCKER_IMAGE = "${env.DOCKER_IMAGE_NAME ?: 'your-dockerhub-username/projet-s3'}"
+    DOCKER_IMAGE = "${env.DOCKER_IMAGE_NAME ?: 'babayaga0/projet-s3'}"
     DOCKER_TAG = "${env.DOCKER_IMAGE_TAG ?: 'latest'}"
   }
 
