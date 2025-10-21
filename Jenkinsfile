@@ -57,21 +57,19 @@ pipeline {
         script {
           if (isUnix()) {
             sh """
-              minikube kubectl -- apply -f k8s/deployment.yaml
-              minikube kubectl -- apply -f k8s/service.yaml
-              minikube kubectl -- apply -f k8s/ingress.yaml
-              minikube kubectl -- rollout status deployment/projet-s3 --timeout=5m
-              minikube kubectl -- get all -l app=projet-s3
+              kubectl apply -f k8s/deployment.yaml
+              kubectl apply -f k8s/service.yaml
+              kubectl apply -f k8s/ingress.yaml
+              kubectl rollout status deployment/projet-s3 --timeout=5m
+              kubectl get all -l app=projet-s3
             """
           } else {
             bat """
-              set MINIKUBE_HOME=C:\\Users\\othma\\.minikube
-              set KUBECONFIG=C:\\Users\\othma\\.kube\\config
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/deployment.yaml
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/service.yaml
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/ingress.yaml
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- rollout status deployment/projet-s3 --timeout=5m
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get all -l app=projet-s3
+              kubectl apply -f k8s/deployment.yaml
+              kubectl apply -f k8s/service.yaml
+              kubectl apply -f k8s/ingress.yaml
+              kubectl rollout status deployment/projet-s3 --timeout=5m
+              kubectl get all -l app=projet-s3
             """
           }
         }
@@ -84,30 +82,28 @@ pipeline {
           if (isUnix()) {
             sh """
               echo "=== Deploying Prometheus ==="
-              minikube kubectl -- apply -f k8s/monitoring/prometheus-config.yaml
-              minikube kubectl -- apply -f k8s/monitoring/prometheus-deployment.yaml
+              kubectl apply -f k8s/monitoring/prometheus-config.yaml
+              kubectl apply -f k8s/monitoring/prometheus-deployment.yaml
               echo "=== Deploying Grafana ==="
-              minikube kubectl -- apply -f k8s/monitoring/grafana-deployment.yaml
+              kubectl apply -f k8s/monitoring/grafana-deployment.yaml
               echo "=== Deploying SonarQube ==="
-              minikube kubectl -- apply -f k8s/monitoring/sonarqube-deployment.yaml
+              kubectl apply -f k8s/monitoring/sonarqube-deployment.yaml
               echo "=== Waiting for monitoring stack to be ready ==="
-              minikube kubectl -- wait --for=condition=available --timeout=5m deployment/prometheus
-              minikube kubectl -- wait --for=condition=available --timeout=5m deployment/grafana
+              kubectl wait --for=condition=available --timeout=5m deployment/prometheus
+              kubectl wait --for=condition=available --timeout=5m deployment/grafana
             """
           } else {
             bat """
-              set MINIKUBE_HOME=C:\\Users\\othma\\.minikube
-              set KUBECONFIG=C:\\Users\\othma\\.kube\\config
               echo === Deploying Prometheus ===
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/monitoring/prometheus-config.yaml
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/monitoring/prometheus-deployment.yaml
+              kubectl apply -f k8s/monitoring/prometheus-config.yaml
+              kubectl apply -f k8s/monitoring/prometheus-deployment.yaml
               echo === Deploying Grafana ===
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/monitoring/grafana-deployment.yaml
+              kubectl apply -f k8s/monitoring/grafana-deployment.yaml
               echo === Deploying SonarQube ===
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/monitoring/sonarqube-deployment.yaml
+              kubectl apply -f k8s/monitoring/sonarqube-deployment.yaml
               echo === Waiting for monitoring stack to be ready ===
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- wait --for=condition=available --timeout=5m deployment/prometheus
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- wait --for=condition=available --timeout=5m deployment/grafana
+              kubectl wait --for=condition=available --timeout=5m deployment/prometheus
+              kubectl wait --for=condition=available --timeout=5m deployment/grafana
             """
           }
         }
@@ -147,8 +143,6 @@ pipeline {
             """
           } else {
             bat """
-              set MINIKUBE_HOME=C:\\Users\\othma\\.minikube
-              set KUBECONFIG=C:\\Users\\othma\\.kube\\config
               echo === Configuring Grafana Dashboard ===
               
               REM Wait 30 seconds for Grafana to be ready
@@ -157,19 +151,19 @@ pipeline {
               
               REM Check Grafana health from inside cluster
               echo Checking Grafana health...
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- run grafana-health-check --image=curlimages/curl:latest --rm -i --restart=Never -- curl -s http://grafana.default.svc.cluster.local:3000/api/health
+              kubectl run grafana-health-check --image=curlimages/curl:latest --rm -i --restart=Never -- curl -s http://grafana.default.svc.cluster.local:3000/api/health
               
               REM Copy dashboard JSON to Grafana pod
               echo Copying dashboard JSON to Grafana pod...
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get pod -l app=grafana -o jsonpath="{.items[0].metadata.name}" > pod_name.txt
+              kubectl get pod -l app=grafana -o jsonpath="{.items[0].metadata.name}" > pod_name.txt
               set /p GRAFANA_POD=<pod_name.txt
               echo Grafana pod: %GRAFANA_POD%
               
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- cp docs/projet-s3-dashboard.json %GRAFANA_POD%:/tmp/dashboard.json
+              kubectl cp docs/projet-s3-dashboard.json %GRAFANA_POD%:/tmp/dashboard.json
               
               REM Import dashboard from inside the pod
               echo Importing dashboard to Grafana API...
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- exec %GRAFANA_POD% -- curl -X POST "http://localhost:3000/api/dashboards/db" -H "Content-Type: application/json" -u admin:admin -d @/tmp/dashboard.json
+              kubectl exec %GRAFANA_POD% -- curl -X POST "http://localhost:3000/api/dashboards/db" -H "Content-Type: application/json" -u admin:admin -d @/tmp/dashboard.json
               
               echo Dashboard import completed!
             """
@@ -184,19 +178,17 @@ pipeline {
           if (isUnix()) {
             sh """
               echo "=== Waiting for SonarQube to be ready ==="
-              minikube kubectl -- wait --for=condition=available --timeout=10m deployment/sonarqube
+              kubectl wait --for=condition=available --timeout=10m deployment/sonarqube
               echo "=== SonarQube is ready ==="
-              minikube kubectl -- get pods -l app=sonarqube
+              kubectl get pods -l app=sonarqube
               echo "Note: Run 'mvn sonar:sonar' with SonarQube token for code analysis"
             """
           } else {
             bat """
-              set MINIKUBE_HOME=C:\\Users\\othma\\.minikube
-              set KUBECONFIG=C:\\Users\\othma\\.kube\\config
               echo === Waiting for SonarQube to be ready ===
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- wait --for=condition=available --timeout=10m deployment/sonarqube
+              kubectl wait --for=condition=available --timeout=10m deployment/sonarqube
               echo === SonarQube is ready ===
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get pods -l app=sonarqube
+              kubectl get pods -l app=sonarqube
               echo Note: Access SonarQube and configure project for analysis
             """
           }
@@ -226,22 +218,20 @@ pipeline {
             """
           } else {
             bat """
-              set MINIKUBE_HOME=C:\\Users\\othma\\.minikube
-              set KUBECONFIG=C:\\Users\\othma\\.kube\\config
               echo === Application Deployment Status ===
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get deployment projet-s3
+              kubectl get deployment projet-s3
               echo === Application Pods ===
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get pods -l app=projet-s3 -o wide
+              kubectl get pods -l app=projet-s3 -o wide
               echo === Application Service ===
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get service projet-s3
+              kubectl get service projet-s3
               echo === Application Ingress ===
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get ingress projet-s3
+              kubectl get ingress projet-s3
               echo === Monitoring Stack Status ===
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get pods -l app=prometheus
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get pods -l app=grafana
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get pods -l app=sonarqube
+              kubectl get pods -l app=prometheus
+              kubectl get pods -l app=grafana
+              kubectl get pods -l app=sonarqube
               echo === All Services ===
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get svc
+              kubectl get svc
             """
           }
         }
@@ -253,13 +243,10 @@ pipeline {
     success {
       script {
         def podCount = ''
-        def minikubeIP = ''
         if (isUnix()) {
-          podCount = sh(script: "minikube kubectl -- get pods -l app=projet-s3 --no-headers | wc -l", returnStdout: true).trim()
-          minikubeIP = sh(script: "minikube ip", returnStdout: true).trim()
+          podCount = sh(script: "kubectl get pods -l app=projet-s3 --no-headers | wc -l", returnStdout: true).trim()
         } else {
-          podCount = bat(script: "@set MINIKUBE_HOME=C:\\Users\\othma\\.minikube && @set KUBECONFIG=C:\\Users\\othma\\.kube\\config && @\"C:\\ProgramData\\chocolatey\\bin\\minikube.exe\" kubectl -- get pods -l app=projet-s3 --no-headers | find /c /v \"\"", returnStdout: true).trim()
-          minikubeIP = bat(script: "@\"C:\\ProgramData\\chocolatey\\bin\\minikube.exe\" ip", returnStdout: true).trim()
+          podCount = bat(script: "@kubectl get pods -l app=projet-s3 --no-headers | find /c /v \"\"", returnStdout: true).trim()
         }
         echo "=========================================="
         echo "✅ BUILD SUCCESSFUL"
@@ -269,12 +256,12 @@ pipeline {
         echo ""
         echo "🌐 ACCESS YOUR SERVICES:"
         echo "=========================================="
-        echo "Application:  http://${minikubeIP}:30081"
-        echo "Prometheus:   http://${minikubeIP}:30090"
-        echo "Grafana:      http://${minikubeIP}:30300"
+        echo "Application:  http://localhost:30081"
+        echo "Prometheus:   http://localhost:30090"
+        echo "Grafana:      http://localhost:30300"
         echo "              Username: admin"
         echo "              Password: admin"
-        echo "SonarQube:    http://${minikubeIP}:30900"
+        echo "SonarQube:    http://localhost:30900"
         echo "              Username: admin"
         echo "              Password: admin"
         echo "=========================================="
