@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
         - name: projet-s3
-          image: your-dockerhub-username/projet-s3:latest
-          imagePullPolicy: IfNotPresent
+          image: babayaga0/projet-s3:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           resources:

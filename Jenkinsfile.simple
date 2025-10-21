@@ -1,0 +1,60 @@
+pipeline {
+  agent any
+
+  options {
+    skipDefaultCheckout(false)
+    timestamps()
+  }
+
+  triggers {
+    pollSCM('H/5 * * * *')  // Poll every 5 minutes
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Build & Test') {
+      steps {
+        script {
+          if (isUnix()) {
+            sh 'mvn -version && mvn -B -DskipTests=false clean package'
+          } else {
+            bat 'mvn -version && mvn -B -DskipTests=false clean package'
+          }
+        }
+      }
+      post {
+        always {
+          junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+          archiveArtifacts artifacts: 'target/*.war', fingerprint: true, onlyIfSuccessful: true
+        }
+      }
+    }
+
+    stage('Docker Build') {
+      steps {
+        script {
+          // Just build locally, don't push
+          if (isUnix()) {
+            sh 'docker build -t projet-s3:build-${BUILD_NUMBER} .'
+          } else {
+            bat "docker build -t projet-s3:build-${BUILD_NUMBER} ."
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    success {
+      echo "Build successful: ${env.BUILD_TAG}"
+    }
+    failure {
+      echo "Build failed: ${env.BUILD_TAG}"
+    }
+  }
+}
