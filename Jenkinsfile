@@ -86,8 +86,7 @@ pipeline {
               echo "=== Deploying Prometheus ==="
               minikube kubectl -- apply -f k8s/monitoring/prometheus-config.yaml
               minikube kubectl -- apply -f k8s/monitoring/prometheus-deployment.yaml
-              echo "=== Deploying Grafana ==="
-              minikube kubectl -- apply -f k8s/monitoring/grafana-dashboards.yaml
+              echo "=== Deploying Grafana with Auto-Provisioned Dashboards ==="
               minikube kubectl -- apply -f k8s/monitoring/grafana-deployment.yaml
               echo "=== Deploying SonarQube ==="
               minikube kubectl -- apply -f k8s/monitoring/sonarqube-deployment.yaml
@@ -103,8 +102,7 @@ pipeline {
               echo === Deploying Prometheus ===
               "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/monitoring/prometheus-config.yaml
               "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/monitoring/prometheus-deployment.yaml
-              echo === Deploying Grafana ===
-              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/monitoring/grafana-dashboards.yaml
+              echo === Deploying Grafana with Auto-Provisioned Dashboards ===
               "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/monitoring/grafana-deployment.yaml
               echo === Deploying SonarQube ===
               "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/monitoring/sonarqube-deployment.yaml
