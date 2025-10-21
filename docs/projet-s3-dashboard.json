@@ -1,0 +1,367 @@
+{
+  "dashboard": {
+    "title": "Projet-S3 Kubernetes Monitoring",
+    "tags": ["kubernetes", "projet-s3", "monitoring"],
+    "timezone": "browser",
+    "editable": true,
+    "panels": [
+      {
+        "id": 1,
+        "title": "Pod Status",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 0, "w": 4, "h": 4},
+        "targets": [{
+          "expr": "count(kube_pod_info{namespace=\"default\",pod=~\"projet-s3.*\"})",
+          "refId": "A"
+        }],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 1, "color": "yellow"},
+                {"value": 2, "color": "green"}
+              ]
+            },
+            "unit": "short",
+            "displayName": "Running Pods"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Total Requests",
+        "type": "stat",
+        "gridPos": {"x": 4, "y": 0, "w": 4, "h": 4},
+        "targets": [{
+          "expr": "sum(rate(container_network_receive_packets_total{namespace=\"default\",pod=~\"projet-s3.*\"}[5m]))",
+          "refId": "A"
+        }],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "pps",
+            "displayName": "Packets/sec"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Average Response Time",
+        "type": "stat",
+        "gridPos": {"x": 8, "y": 0, "w": 4, "h": 4},
+        "targets": [{
+          "expr": "avg(rate(container_cpu_usage_seconds_total{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])) * 1000",
+          "refId": "A"
+        }],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "displayName": "Avg Time"
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Deployment Status",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 0, "w": 4, "h": 4},
+        "targets": [{
+          "expr": "kube_deployment_status_replicas_available{namespace=\"default\",deployment=\"projet-s3\"}",
+          "refId": "A"
+        }],
+        "options": {
+          "graphMode": "none",
+          "colorMode": "background"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 2, "color": "green"}
+              ]
+            },
+            "displayName": "Available Replicas"
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Memory Usage (MB)",
+        "type": "stat",
+        "gridPos": {"x": 16, "y": 0, "w": 4, "h": 4},
+        "targets": [{
+          "expr": "sum(container_memory_usage_bytes{namespace=\"default\",pod=~\"projet-s3.*\"}) / 1024 / 1024",
+          "refId": "A"
+        }],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "decmbytes",
+            "displayName": "Memory"
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "CPU Usage per Pod",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8},
+        "targets": [{
+          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])) by (pod)",
+          "legendFormat": "{{pod}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percentunit",
+            "custom": {
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "bottom"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Memory Usage per Pod (MB)",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8},
+        "targets": [{
+          "expr": "sum(container_memory_usage_bytes{namespace=\"default\",pod=~\"projet-s3.*\"}) by (pod) / 1024 / 1024",
+          "legendFormat": "{{pod}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "decmbytes",
+            "custom": {
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Network Traffic In (KB/s)",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 12, "w": 12, "h": 8},
+        "targets": [{
+          "expr": "sum(rate(container_network_receive_bytes_total{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])) by (pod) / 1024",
+          "legendFormat": "{{pod}} - IN"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "KBs",
+            "custom": {
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20
+            }
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Network Traffic Out (KB/s)",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 12, "w": 12, "h": 8},
+        "targets": [{
+          "expr": "sum(rate(container_network_transmit_bytes_total{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])) by (pod) / 1024",
+          "legendFormat": "{{pod}} - OUT"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "KBs",
+            "custom": {
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20
+            }
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Pod Restarts",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 20, "w": 8, "h": 6},
+        "targets": [{
+          "expr": "sum(kube_pod_container_status_restarts_total{namespace=\"default\",pod=~\"projet-s3.*\"}) by (pod)",
+          "legendFormat": "{{pod}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "drawStyle": "bars"
+            }
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Container State",
+        "type": "table",
+        "gridPos": {"x": 8, "y": 20, "w": 8, "h": 6},
+        "targets": [{
+          "expr": "kube_pod_container_status_ready{namespace=\"default\",pod=~\"projet-s3.*\"}",
+          "format": "table",
+          "instant": true
+        }],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "__name__": true,
+                "Time": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Disk Usage",
+        "type": "gauge",
+        "gridPos": {"x": 16, "y": 20, "w": 8, "h": 6},
+        "targets": [{
+          "expr": "sum(container_fs_usage_bytes{namespace=\"default\",pod=~\"projet-s3.*\"}) / sum(container_fs_limit_bytes{namespace=\"default\",pod=~\"projet-s3.*\"}) * 100"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 70, "color": "yellow"},
+                {"value": 85, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 13,
+        "title": "HTTP Response Codes Distribution",
+        "type": "piechart",
+        "gridPos": {"x": 0, "y": 26, "w": 8, "h": 8},
+        "targets": [{
+          "expr": "sum(rate(container_network_receive_packets_total{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])) by (pod)",
+          "legendFormat": "{{pod}}"
+        }],
+        "options": {
+          "legend": {
+            "displayMode": "list",
+            "placement": "right"
+          },
+          "pieType": "donut"
+        }
+      },
+      {
+        "id": 14,
+        "title": "Resource Utilization (%)",
+        "type": "bargauge",
+        "gridPos": {"x": 8, "y": 26, "w": 8, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])) by (pod) * 100",
+            "legendFormat": "CPU - {{pod}}"
+          },
+          {
+            "expr": "sum(container_memory_usage_bytes{namespace=\"default\",pod=~\"projet-s3.*\"}) by (pod) / sum(container_spec_memory_limit_bytes{namespace=\"default\",pod=~\"projet-s3.*\"}) by (pod) * 100",
+            "legendFormat": "Memory - {{pod}}"
+          }
+        ],
+        "options": {
+          "orientation": "horizontal",
+          "displayMode": "gradient"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 50, "color": "yellow"},
+                {"value": 80, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 15,
+        "title": "Service Availability (Uptime)",
+        "type": "stat",
+        "gridPos": {"x": 16, "y": 26, "w": 8, "h": 4},
+        "targets": [{
+          "expr": "avg(up{job=~\".*projet-s3.*\"}) * 100"
+        }],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "background"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 95, "color": "yellow"},
+                {"value": 99, "color": "green"}
+              ]
+            },
+            "displayName": "Uptime %"
+          }
+        }
+      },
+      {
+        "id": 16,
+        "title": "Pod Age",
+        "type": "stat",
+        "gridPos": {"x": 16, "y": 30, "w": 8, "h": 4},
+        "targets": [{
+          "expr": "(time() - kube_pod_start_time{namespace=\"default\",pod=~\"projet-s3.*\"}) / 3600",
+          "legendFormat": "{{pod}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "h",
+            "displayName": "Hours Running"
+          }
+        }
+      }
+    ],
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"]
+    }
+  }
+}
