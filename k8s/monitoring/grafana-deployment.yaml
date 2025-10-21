@@ -27,9 +27,13 @@ spec:
           value: "admin"
         - name: GF_INSTALL_PLUGINS
           value: "grafana-piechart-panel"
+        - name: GF_PATHS_PROVISIONING
+          value: "/etc/grafana/provisioning"
         volumeMounts:
         - name: grafana-storage
           mountPath: /var/lib/grafana
+        - name: grafana-datasources
+          mountPath: /etc/grafana/provisioning/datasources
         resources:
           requests:
             memory: "128Mi"
@@ -40,6 +44,9 @@ spec:
       volumes:
       - name: grafana-storage
         emptyDir: {}
+      - name: grafana-datasources
+        configMap:
+          name: grafana-datasources
 ---
 apiVersion: v1
 kind: Service
@@ -64,7 +71,7 @@ metadata:
   name: grafana-datasources
   namespace: default
 data:
-  prometheus.yaml: |
+  datasource.yaml: |
     apiVersion: 1
     datasources:
     - name: Prometheus
@@ -73,3 +80,5 @@ data:
       url: http://prometheus:9090
       isDefault: true
       editable: true
+      jsonData:
+        timeInterval: "5s"

@@ -1,0 +1,121 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: default
+data:
+  kubernetes-pods-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "uid": "k8s-pods",
+        "title": "Kubernetes Pods Monitoring",
+        "tags": ["kubernetes", "pods"],
+        "timezone": "browser",
+        "schemaVersion": 16,
+        "version": 0,
+        "refresh": "10s",
+        "panels": [
+          {
+            "id": 1,
+            "title": "CPU Usage",
+            "type": "graph",
+            "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+            "targets": [
+              {
+                "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])) by (pod)",
+                "legendFormat": "{{pod}}",
+                "refId": "A"
+              }
+            ],
+            "yaxes": [
+              {"format": "percentunit", "label": "CPU Usage"},
+              {"format": "short"}
+            ]
+          },
+          {
+            "id": 2,
+            "title": "Memory Usage",
+            "type": "graph",
+            "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+            "targets": [
+              {
+                "expr": "sum(container_memory_usage_bytes{namespace=\"default\",pod=~\"projet-s3.*\"}) by (pod)",
+                "legendFormat": "{{pod}}",
+                "refId": "A"
+              }
+            ],
+            "yaxes": [
+              {"format": "bytes", "label": "Memory"},
+              {"format": "short"}
+            ]
+          },
+          {
+            "id": 3,
+            "title": "Pod Status",
+            "type": "stat",
+            "gridPos": {"x": 0, "y": 8, "w": 6, "h": 4},
+            "targets": [
+              {
+                "expr": "count(kube_pod_status_phase{namespace=\"default\",pod=~\"projet-s3.*\",phase=\"Running\"})",
+                "refId": "A"
+              }
+            ],
+            "options": {
+              "graphMode": "none",
+              "colorMode": "value"
+            },
+            "fieldConfig": {
+              "defaults": {
+                "thresholds": {
+                  "mode": "absolute",
+                  "steps": [
+                    {"value": 0, "color": "red"},
+                    {"value": 1, "color": "green"}
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "id": 4,
+            "title": "Network I/O",
+            "type": "graph",
+            "gridPos": {"x": 0, "y": 12, "w": 24, "h": 8},
+            "targets": [
+              {
+                "expr": "sum(rate(container_network_receive_bytes_total{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])) by (pod)",
+                "legendFormat": "Received - {{pod}}",
+                "refId": "A"
+              },
+              {
+                "expr": "sum(rate(container_network_transmit_bytes_total{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])) by (pod)",
+                "legendFormat": "Transmitted - {{pod}}",
+                "refId": "B"
+              }
+            ],
+            "yaxes": [
+              {"format": "Bps", "label": "Network I/O"},
+              {"format": "short"}
+            ]
+          },
+          {
+            "id": 5,
+            "title": "Pod Restarts",
+            "type": "graph",
+            "gridPos": {"x": 6, "y": 8, "w": 18, "h": 4},
+            "targets": [
+              {
+                "expr": "sum(kube_pod_container_status_restarts_total{namespace=\"default\",pod=~\"projet-s3.*\"}) by (pod)",
+                "legendFormat": "{{pod}}",
+                "refId": "A"
+              }
+            ],
+            "yaxes": [
+              {"format": "short", "label": "Restarts"},
+              {"format": "short"}
+            ]
+          }
+        ]
+      }
+    }
