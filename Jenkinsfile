@@ -16,6 +16,24 @@ pipeline {
   }
 
   stages {
+    stage('Verify Minikube') {
+      steps {
+        script {
+          if (isUnix()) {
+            sh '''
+              echo "=== Checking Minikube Status ==="
+              minikube status || minikube start
+            '''
+          } else {
+            bat '''
+              echo === Checking Minikube Status ===
+              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" status || "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" start
+            '''
+          }
+        }
+      }
+    }
+
     stage('Checkout') {
       steps {
         checkout scm
