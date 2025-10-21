@@ -151,23 +151,26 @@ pipeline {
               set KUBECONFIG=C:\\Users\\othma\\.kube\\config
               echo === Configuring Grafana Dashboard ===
               
-              REM Get Minikube IP
-              for /f %%i in ('\"C:\\ProgramData\\chocolatey\\bin\\minikube.exe\" ip') do set MINIKUBE_IP=%%i
-              echo Minikube IP: %MINIKUBE_IP%
-              
               REM Wait 30 seconds for Grafana to be ready
               echo Waiting 30 seconds for Grafana to be ready...
               ping 127.0.0.1 -n 31 > nul
               
-              REM Import dashboard
-              echo Importing dashboard to Grafana...
-              curl -X POST "http://%MINIKUBE_IP%:30300/api/dashboards/db" -H "Content-Type: application/json" -u admin:admin -d @docs/projet-s3-dashboard.json
+              REM Check Grafana health from inside cluster
+              echo Checking Grafana health...
+              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- run grafana-health-check --image=curlimages/curl:latest --rm -i --restart=Never -- curl -s http://grafana.default.svc.cluster.local:3000/api/health
               
-              if %ERRORLEVEL% EQU 0 (
-                echo Dashboard imported successfully!
-              ) else (
-                echo Warning: Dashboard import may have failed, check Grafana manually
-              )
+              REM Copy dashboard JSON to Grafana pod
+              echo Copying dashboard JSON to Grafana pod...
+              for /f "tokens=*" %%i in ('\"C:\\ProgramData\\chocolatey\\bin\\minikube.exe\" kubectl -- get pod -l app=grafana -o jsonpath="{.items[0].metadata.name}"') do set GRAFANA_POD=%%i
+              echo Grafana pod: %GRAFANA_POD%
+              
+              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- cp docs/projet-s3-dashboard.json %GRAFANA_POD%:/tmp/dashboard.json
+              
+              REM Import dashboard from inside the pod
+              echo Importing dashboard to Grafana API...
+              "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- exec %GRAFANA_POD% -- curl -X POST "http://localhost:3000/api/dashboards/db" -H "Content-Type: application/json" -u admin:admin -d @/tmp/dashboard.json
+              
+              echo Dashboard import completed!
             """
           }
         }
