@@ -52,32 +52,30 @@ pipeline {
       }
     }
 
-    stage('Deploy to Kubernetes') {
-      steps {
-        script {
-          def kubeconfigPath = isUnix() ? '~/.kube/config' : 'C:\\ProgramData\\Jenkins\\.kube\\config'
-          if (isUnix()) {
-            sh """
-              kubectl --kubeconfig=${kubeconfigPath} apply -f k8s/deployment.yaml
-              kubectl --kubeconfig=${kubeconfigPath} apply -f k8s/service.yaml
-              kubectl --kubeconfig=${kubeconfigPath} apply -f k8s/ingress.yaml
-              kubectl --kubeconfig=${kubeconfigPath} rollout status deployment/projet-s3 --timeout=5m
-              kubectl --kubeconfig=${kubeconfigPath} get all -l app=projet-s3
-            """
-          } else {
-            bat """
-              kubectl --kubeconfig=${kubeconfigPath} apply -f k8s/deployment.yaml
-              kubectl --kubeconfig=${kubeconfigPath} apply -f k8s/service.yaml
-              kubectl --kubeconfig=${kubeconfigPath} apply -f k8s/ingress.yaml
-              kubectl --kubeconfig=${kubeconfigPath} rollout status deployment/projet-s3 --timeout=5m
-              kubectl --kubeconfig=${kubeconfigPath} get all -l app=projet-s3
-            """
-          }
-        }
-      }
-    }
-
-    stage('Verify Deployment') {
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    def kubeconfigPath = isUnix() ? '~/.kube/config' : 'C:\\ProgramData\\Jenkins\\.kube\\config'
+                    if (isUnix()) {
+                        sh """
+                            kubectl --kubeconfig=${kubeconfigPath} --context=minikube apply -f k8s/deployment.yaml
+                            kubectl --kubeconfig=${kubeconfigPath} --context=minikube apply -f k8s/service.yaml
+                            kubectl --kubeconfig=${kubeconfigPath} --context=minikube apply -f k8s/ingress.yaml
+                            kubectl --kubeconfig=${kubeconfigPath} --context=minikube rollout status deployment/projet-s3 --timeout=5m
+                            kubectl --kubeconfig=${kubeconfigPath} --context=minikube get all -l app=projet-s3
+                        """
+                    } else {
+                        bat """
+                            kubectl --kubeconfig=${kubeconfigPath} --context=minikube apply -f k8s/deployment.yaml
+                            kubectl --kubeconfig=${kubeconfigPath} --context=minikube apply -f k8s/service.yaml
+                            kubectl --kubeconfig=${kubeconfigPath} --context=minikube apply -f k8s/ingress.yaml
+                            kubectl --kubeconfig=${kubeconfigPath} --context=minikube rollout status deployment/projet-s3 --timeout=5m
+                            kubectl --kubeconfig=${kubeconfigPath} --context=minikube get all -l app=projet-s3
+                        """
+                    }
+                }
+            }
+        }    stage('Verify Deployment') {
       steps {
         script {
           def kubeconfigPath = isUnix() ? '~/.kube/config' : 'C:\\ProgramData\\Jenkins\\.kube\\config'
