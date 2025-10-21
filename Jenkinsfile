@@ -81,6 +81,26 @@ pipeline {
       }
     }
 
+    // Run SonarQube analysis (requires Jenkins credential 'sonar-token')
+    stage('SonarQube Analysis (CI)') {
+      steps {
+        script {
+          withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+            if (isUnix()) {
+              sh "mvn -B sonar:sonar -Dsonar.login=${SONAR_TOKEN} -Dsonar.host.url=http://sonarqube:9000"
+            } else {
+              bat "mvn -B sonar:sonar -Dsonar.login=%SONAR_TOKEN% -Dsonar.host.url=http://sonarqube:9000"
+            }
+          }
+        }
+      }
+      post {
+        failure {
+          echo "SonarQube analysis failed. Ensure Jenkins has credential id 'sonar-token' with a valid token."
+        }
+      }
+    }
+
     stage('Docker Build & Push') {
       steps {
         script {
