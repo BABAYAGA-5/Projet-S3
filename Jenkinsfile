@@ -7,8 +7,6 @@ pipeline {
   }
 
   environment {
-    // Configure these in Jenkins: Manage Jenkins → Credentials
-    DOCKERHUB_CREDENTIALS = credentials('dockerhub-creds')
     DOCKER_IMAGE = "${env.DOCKER_IMAGE_NAME ?: 'babayaga0/projet-s3'}"
     DOCKER_TAG = "${env.DOCKER_IMAGE_TAG ?: 'latest'}"
   }
@@ -46,7 +44,7 @@ pipeline {
     stage('Docker Build & Push') {
       steps {
         script {
-          docker.withRegistry('https://registry.hub.docker.com', DOCKERHUB_CREDENTIALS) {
+          docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-creds') {
             def app = docker.build("${DOCKER_IMAGE}:${DOCKER_TAG}")
             app.push()
           }
