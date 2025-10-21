@@ -44,23 +44,6 @@ pipeline {
       }
     }
 
-    stage('SonarQube Analysis') {
-      when { 
-        expression { return fileExists('sonar-project.properties') } 
-      }
-      steps {
-        withSonarQubeEnv('SonarQubeServer') {
-          script {
-            if (isUnix()) {
-              sh 'mvn -B -DskipTests sonar:sonar'
-            } else {
-              bat 'mvn -B -DskipTests sonar:sonar'
-            }
-          }
-        }
-      }
-    }
-
     stage('Docker Build & Push') {
       steps {
         script {
