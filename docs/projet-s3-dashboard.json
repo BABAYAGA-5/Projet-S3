@@ -2,8 +2,8 @@
   "dashboard": {
     "id": null,
     "uid": null,
-    "title": "Projet-S3 Kubernetes Monitoring",
-    "tags": ["kubernetes", "projet-s3", "monitoring"],
+    "title": "Projet-S3 Advanced Monitoring Dashboard",
+    "tags": ["kubernetes", "projet-s3", "monitoring", "java", "performance"],
     "timezone": "browser",
     "editable": true,
     "panels": [
@@ -355,6 +355,492 @@
             "displayName": "Hours Running"
           }
         }
+      },
+      {
+        "id": 17,
+        "title": "JVM Heap Memory Usage",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 34, "w": 12, "h": 8},
+        "targets": [
+          {
+            "expr": "sum(jvm_memory_used_bytes{area=\"heap\",namespace=\"default\",pod=~\"projet-s3.*\"}) by (pod) / 1024 / 1024",
+            "legendFormat": "Used - {{pod}}"
+          },
+          {
+            "expr": "sum(jvm_memory_max_bytes{area=\"heap\",namespace=\"default\",pod=~\"projet-s3.*\"}) by (pod) / 1024 / 1024",
+            "legendFormat": "Max - {{pod}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "decmbytes",
+            "custom": {
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "bottom",
+            "calcs": ["mean", "lastNotNull", "max"]
+          }
+        }
+      },
+      {
+        "id": 18,
+        "title": "JVM Garbage Collection Rate",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 34, "w": 12, "h": 8},
+        "targets": [{
+          "expr": "rate(jvm_gc_collection_seconds_sum{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])",
+          "legendFormat": "{{gc}} - {{pod}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "custom": {
+              "lineInterpolation": "smooth",
+              "fillOpacity": 15
+            }
+          }
+        }
+      },
+      {
+        "id": 19,
+        "title": "Thread Count",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 42, "w": 8, "h": 6},
+        "targets": [
+          {
+            "expr": "jvm_threads_current{namespace=\"default\",pod=~\"projet-s3.*\"}",
+            "legendFormat": "Active - {{pod}}"
+          },
+          {
+            "expr": "jvm_threads_daemon{namespace=\"default\",pod=~\"projet-s3.*\"}",
+            "legendFormat": "Daemon - {{pod}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "lineInterpolation": "smooth"
+            }
+          }
+        }
+      },
+      {
+        "id": 20,
+        "title": "Database Connection Pool",
+        "type": "gauge",
+        "gridPos": {"x": 8, "y": 42, "w": 8, "h": 6},
+        "targets": [
+          {
+            "expr": "hikaricp_connections_active{namespace=\"default\",pod=~\"projet-s3.*\"}",
+            "legendFormat": "Active"
+          },
+          {
+            "expr": "hikaricp_connections_idle{namespace=\"default\",pod=~\"projet-s3.*\"}",
+            "legendFormat": "Idle"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 8, "color": "yellow"},
+                {"value": 15, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        }
+      },
+      {
+        "id": 21,
+        "title": "HTTP Request Rate",
+        "type": "timeseries",
+        "gridPos": {"x": 16, "y": 42, "w": 8, "h": 6},
+        "targets": [{
+          "expr": "rate(http_server_requests_seconds_count{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])",
+          "legendFormat": "{{method}} {{uri}} - {{status}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "custom": {
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            }
+          }
+        }
+      },
+      {
+        "id": 22,
+        "title": "HTTP Response Time (p95)",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 48, "w": 12, "h": 8},
+        "targets": [{
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])) by (le, uri, method)) * 1000",
+          "legendFormat": "{{method}} {{uri}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "custom": {
+              "lineInterpolation": "smooth",
+              "fillOpacity": 20
+            },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 500, "color": "yellow"},
+                {"value": 1000, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "legend": {
+            "displayMode": "table",
+            "placement": "bottom",
+            "calcs": ["mean", "lastNotNull", "max"]
+          }
+        }
+      },
+      {
+        "id": 23,
+        "title": "Error Rate (5xx)",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 48, "w": 12, "h": 8},
+        "targets": [{
+          "expr": "sum(rate(http_server_requests_seconds_count{namespace=\"default\",pod=~\"projet-s3.*\",status=~\"5..\"}[5m])) by (pod)",
+          "legendFormat": "Errors - {{pod}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps",
+            "custom": {
+              "lineInterpolation": "smooth",
+              "fillOpacity": 30,
+              "lineStyle": {
+                "fill": "solid"
+              }
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "red"
+            }
+          }
+        },
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [0.1],
+                "type": "gt"
+              },
+              "operator": {
+                "type": "and"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              },
+              "reducer": {
+                "params": [],
+                "type": "avg"
+              },
+              "type": "query"
+            }
+          ],
+          "executionErrorState": "alerting",
+          "frequency": "1m",
+          "handler": 1,
+          "name": "High Error Rate Alert",
+          "noDataState": "no_data",
+          "notifications": []
+        }
+      },
+      {
+        "id": 24,
+        "title": "Request Success Rate",
+        "type": "stat",
+        "gridPos": {"x": 0, "y": 56, "w": 6, "h": 4},
+        "targets": [{
+          "expr": "sum(rate(http_server_requests_seconds_count{namespace=\"default\",pod=~\"projet-s3.*\",status!~\"5..\"}[5m])) / sum(rate(http_server_requests_seconds_count{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])) * 100"
+        }],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "background"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "decimals": 2,
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 95, "color": "yellow"},
+                {"value": 99, "color": "green"}
+              ]
+            },
+            "displayName": "Success Rate"
+          }
+        }
+      },
+      {
+        "id": 25,
+        "title": "Average Response Time",
+        "type": "stat",
+        "gridPos": {"x": 6, "y": 56, "w": 6, "h": 4},
+        "targets": [{
+          "expr": "sum(rate(http_server_requests_seconds_sum{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])) / sum(rate(http_server_requests_seconds_count{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])) * 1000"
+        }],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms",
+            "decimals": 2,
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 200, "color": "yellow"},
+                {"value": 500, "color": "red"}
+              ]
+            },
+            "displayName": "Avg Response"
+          }
+        }
+      },
+      {
+        "id": 26,
+        "title": "Requests per Minute",
+        "type": "stat",
+        "gridPos": {"x": 12, "y": 56, "w": 6, "h": 4},
+        "targets": [{
+          "expr": "sum(rate(http_server_requests_seconds_count{namespace=\"default\",pod=~\"projet-s3.*\"}[1m])) * 60"
+        }],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqpm",
+            "decimals": 0,
+            "displayName": "Requests/min"
+          }
+        }
+      },
+      {
+        "id": 27,
+        "title": "Active Sessions",
+        "type": "stat",
+        "gridPos": {"x": 18, "y": 56, "w": 6, "h": 4},
+        "targets": [{
+          "expr": "tomcat_sessions_active_current_sessions{namespace=\"default\",pod=~\"projet-s3.*\"}"
+        }],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "displayName": "Active Sessions"
+          }
+        }
+      },
+      {
+        "id": 28,
+        "title": "File Descriptors Usage",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 60, "w": 12, "h": 6},
+        "targets": [
+          {
+            "expr": "process_open_fds{namespace=\"default\",pod=~\"projet-s3.*\"}",
+            "legendFormat": "Open - {{pod}}"
+          },
+          {
+            "expr": "process_max_fds{namespace=\"default\",pod=~\"projet-s3.*\"}",
+            "legendFormat": "Max - {{pod}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "lineInterpolation": "smooth"
+            }
+          }
+        }
+      },
+      {
+        "id": 29,
+        "title": "Disk I/O Operations",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 60, "w": 12, "h": 6},
+        "targets": [
+          {
+            "expr": "rate(container_fs_reads_total{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])",
+            "legendFormat": "Reads - {{pod}}"
+          },
+          {
+            "expr": "rate(container_fs_writes_total{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])",
+            "legendFormat": "Writes - {{pod}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "iops",
+            "custom": {
+              "lineInterpolation": "smooth",
+              "fillOpacity": 10
+            }
+          }
+        }
+      },
+      {
+        "id": 30,
+        "title": "Log Errors per Minute",
+        "type": "timeseries",
+        "gridPos": {"x": 0, "y": 66, "w": 12, "h": 6},
+        "targets": [{
+          "expr": "sum(rate(logback_events_total{namespace=\"default\",pod=~\"projet-s3.*\",level=\"error\"}[1m])) by (pod) * 60",
+          "legendFormat": "{{pod}}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "drawStyle": "bars",
+              "fillOpacity": 50
+            },
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "red"
+            }
+          }
+        }
+      },
+      {
+        "id": 31,
+        "title": "Class Loading",
+        "type": "timeseries",
+        "gridPos": {"x": 12, "y": 66, "w": 12, "h": 6},
+        "targets": [
+          {
+            "expr": "jvm_classes_loaded{namespace=\"default\",pod=~\"projet-s3.*\"}",
+            "legendFormat": "Loaded - {{pod}}"
+          },
+          {
+            "expr": "jvm_classes_unloaded_total{namespace=\"default\",pod=~\"projet-s3.*\"}",
+            "legendFormat": "Unloaded - {{pod}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "custom": {
+              "lineInterpolation": "smooth"
+            }
+          }
+        }
+      },
+      {
+        "id": 32,
+        "title": "System Load Average",
+        "type": "gauge",
+        "gridPos": {"x": 0, "y": 72, "w": 8, "h": 6},
+        "targets": [{
+          "expr": "system_load_average_1m{namespace=\"default\",pod=~\"projet-s3.*\"}"
+        }],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 2, "color": "yellow"},
+                {"value": 4, "color": "red"}
+              ]
+            }
+          }
+        },
+        "options": {
+          "showThresholdLabels": true,
+          "showThresholdMarkers": true
+        }
+      },
+      {
+        "id": 33,
+        "title": "Top Endpoints by Request Count",
+        "type": "table",
+        "gridPos": {"x": 8, "y": 72, "w": 16, "h": 6},
+        "targets": [{
+          "expr": "topk(10, sum by (uri, method) (rate(http_server_requests_seconds_count{namespace=\"default\",pod=~\"projet-s3.*\"}[5m])))",
+          "format": "table",
+          "instant": true
+        }],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "__name__": true,
+                "Time": true
+              },
+              "renameByName": {
+                "Value": "Requests/sec",
+                "uri": "Endpoint",
+                "method": "Method"
+              }
+            }
+          },
+          {
+            "id": "sortBy",
+            "options": {
+              "fields": {},
+              "sort": [
+                {
+                  "field": "Requests/sec",
+                  "desc": true
+                }
+              ]
+            }
+          }
+        ],
+        "fieldConfig": {
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Requests/sec"
+              },
+              "properties": [
+                {
+                  "id": "custom.displayMode",
+                  "value": "gradient-gauge"
+                },
+                {
+                  "id": "decimals",
+                  "value": 3
+                }
+              ]
+            }
+          ]
+        }
       }
     ],
     "refresh": "10s",
@@ -363,9 +849,31 @@
       "to": "now"
     },
     "timepicker": {
-      "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"]
+      "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m"]
+    },
+    "annotations": {
+      "list": [
+        {
+          "datasource": "Prometheus",
+          "enable": true,
+          "expr": "changes(kube_pod_container_status_restarts_total{namespace=\"default\",pod=~\"projet-s3.*\"}[5m]) > 0",
+          "iconColor": "red",
+          "name": "Pod Restarts",
+          "tagKeys": "pod",
+          "textFormat": "Pod {{pod}} restarted",
+          "titleFormat": "Restart Event"
+        },
+        {
+          "datasource": "Prometheus",
+          "enable": true,
+          "expr": "changes(kube_deployment_status_replicas_updated{namespace=\"default\",deployment=\"projet-s3\"}[5m]) > 0",
+          "iconColor": "blue",
+          "name": "Deployments",
+          "titleFormat": "Deployment Update"
+        }
+      ]
     }
   },
   "overwrite": true,
-  "message": "Updated by Jenkins Pipeline"
+  "message": "Enhanced monitoring dashboard with JVM, HTTP, and system metrics"
 }
