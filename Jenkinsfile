@@ -161,7 +161,7 @@ pipeline {
               
               REM Copy dashboard JSON to Grafana pod
               echo Copying dashboard JSON to Grafana pod...
-              for /f "tokens=*" %%i in ('\"C:\\ProgramData\\chocolatey\\bin\\minikube.exe\" kubectl -- get pod -l app=grafana -o jsonpath="{.items[0].metadata.name}"') do set GRAFANA_POD=%%i
+              for /f "tokens=*" %%i in ('\"C:\\ProgramData\\chocolatey\\bin\\minikube.exe\" kubectl -- get pod -l app^=grafana -o jsonpath^="{.items[0].metadata.name}"') do set GRAFANA_POD=%%i
               echo Grafana pod: %GRAFANA_POD%
               
               "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- cp docs/projet-s3-dashboard.json %GRAFANA_POD%:/tmp/dashboard.json
