@@ -65,6 +65,8 @@ pipeline {
             """
           } else {
             bat """
+              set MINIKUBE_HOME=C:\\Users\\othma\\.minikube
+              set KUBECONFIG=C:\\Users\\othma\\.kube\\config
               "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/deployment.yaml
               "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/service.yaml
               "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- apply -f k8s/ingress.yaml
@@ -92,6 +94,8 @@ pipeline {
             """
           } else {
             bat """
+              set MINIKUBE_HOME=C:\\Users\\othma\\.minikube
+              set KUBECONFIG=C:\\Users\\othma\\.kube\\config
               echo === Deployment Status ===
               "C:\\ProgramData\\chocolatey\\bin\\minikube.exe" kubectl -- get deployment projet-s3
               echo === Pods ===
@@ -114,7 +118,7 @@ pipeline {
         if (isUnix()) {
           podCount = sh(script: "minikube kubectl -- get pods -l app=projet-s3 --no-headers | wc -l", returnStdout: true).trim()
         } else {
-          podCount = bat(script: "@\"C:\\ProgramData\\chocolatey\\bin\\minikube.exe\" kubectl -- get pods -l app=projet-s3 --no-headers | find /c /v \"\"", returnStdout: true).trim()
+          podCount = bat(script: "@set MINIKUBE_HOME=C:\\Users\\othma\\.minikube && @set KUBECONFIG=C:\\Users\\othma\\.kube\\config && @\"C:\\ProgramData\\chocolatey\\bin\\minikube.exe\" kubectl -- get pods -l app=projet-s3 --no-headers | find /c /v \"\"", returnStdout: true).trim()
         }
         echo "✅ Build successful: ${env.BUILD_TAG}"
         echo "✅ Docker image pushed: ${DOCKER_IMAGE}:${DOCKER_TAG}"
